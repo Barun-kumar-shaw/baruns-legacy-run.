@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barun's Legacy Run</title>
+  <meta name="author" content="Barun Kumar Shaw">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      /* Disable text selection everywhere */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    body {
+      margin: 0; overflow: hidden;
+      background: #0f172a;
+      font-family: 'JetBrains Mono', monospace;
+      touch-action: none;
+    }
+    canvas { display: block; }
+
+    #ui-layer {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      z-index: 50;
+    }
+
+    .btn {
+      pointer-events: auto; color: white;
+      padding: 12px 24px; font-size: 18px;
+      border-radius: 10px; cursor: pointer;
+      text-transform: uppercase; font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      transition: transform 0.1s, box-shadow 0.1s;
+      border: none; width: 100%;
+    }
+    .btn:active { transform: translateY(4px); }
+
+    .btn-easy   { background: #16a34a; box-shadow: 0 6px 0 #14532d; }
+    .btn-medium { background: #eab308; box-shadow: 0 6px 0 #713f12; color: #1a1a1a; }
+    .btn-hard   { background: #dc2626; box-shadow: 0 6px 0 #7f1d1d; }
+    .btn-info   { background: #475569; box-shadow: 0 6px 0 #1e293b; font-size: 15px; }
+    .btn-retry  { background: #2563eb; box-shadow: 0 6px 0 #1e3a8a; }
+
+    .profile-link {
+      pointer-events: auto; text-decoration: none;
+      display: inline-block; margin-bottom: 16px;
+      padding: 6px 14px; background: rgba(37,99,235,0.2);
+      border: 1px solid #3b82f6; border-radius: 4px;
+      color: #60a5fa; font-weight: bold; letter-spacing: 1px;
+      font-size: 12px; transition: all 0.3s;
+    }
+    .profile-link:hover { background: rgba(37,99,235,0.4); color: #fff; }
+
+    .score-entry { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; }
+    .score-gold   { background: rgba(234,179,8,0.15); border: 1px solid #eab308; }
+    .score-silver { background: rgba(148,163,184,0.1); border: 1px solid #64748b; }
+    .score-bronze { background: rgba(180,83,9,0.1); border: 1px solid #92400e; }
+    .score-normal { background: rgba(255,255,255,0.05); border: 1px solid #334155; }
+
+    #combo-display {
+      position: absolute; top: 80px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px; font-weight: 800;
+      color: #fbbf24; text-shadow: 0 0 20px #fbbf24;
+      pointer-events: none; z-index: 200;
+      opacity: 0; transition: opacity 0.3s;
+    }
+
+    #mobile-jump-btn {
+      position: absolute; bottom: 40px; right: 40px;
+      width: 85px; height: 85px;
+      background: rgba(59,130,246,0.55);
+      border: 3px solid rgba(59,130,246,0.9);
+      border-radius: 50%; color: white;
+      font-weight: 800; font-size: 14px;
+      display: flex; justify-content: center; align-items: center;
+      z-index: 100; pointer-events: auto; user-select: none;
+      box-shadow: 0 0 20px rgba(59,130,246,0.4);
+      transition: transform 0.1s;
+    }
+    #mobile-jump-btn:active { transform: scale(0.88); }
+    @media (min-width: 768px) { #mobile-jump-btn { display: none !important; } }
+
+    .hidden { display: none !important; }
+
+    @keyframes pulse-score { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+    .score-pop { animation: pulse-score 0.2s ease; }
+
+    /* ── DISCLAIMER SPLASH ── */
+    #disclaimer-screen {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      z-index: 9999;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding: 24px;
+      animation: fadeOutDisclaimer 0.8s ease 5.5s forwards;
+    }
+    @keyframes fadeOutDisclaimer {
+      0%   { opacity: 1; pointer-events: all; }
+      100% { opacity: 0; pointer-events: none; display: none; }
+    }
+    #disclaimer-bar {
+      height: 4px;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      width: 0%;
+      border-radius: 2px;
+      animation: fillBar 5s linear forwards;
+      margin-top: 20px;
+    }
+    @keyframes fillBar { from { width: 0%; } to { width: 100%; } }
+  </style>
+</head>
+<body class="text-white">
+
+<!-- legal splash screen -->
+<div id="disclaimer-screen">
+  <div style="max-width:600px; width:100%;">
+
+    <!-- Logo -->
+    <div style="font-size:52px; margin-bottom:8px;">⚖️</div>
+    <h1 style="color:#ef4444; font-size:26px; font-weight:900; letter-spacing:3px; margin-bottom:4px;">LEGAL NOTICE</h1>
+    <p style="color:#fbbf24; font-size:13px; letter-spacing:2px; margin-bottom:24px;">COPYRIGHT & INTELLECTUAL PROPERTY WARNING</p>
+
+    <div style="background:rgba(239,68,68,0.08); border:1px solid #ef4444; border-radius:10px; padding:20px; text-align:left; margin-bottom:20px;">
+      <p style="color:#f87171; font-size:13px; line-height:1.9; margin:0;">
+        ⚠️ <strong style="color:#fca5a5;">WARNING:</strong> This game — <strong style="color:#ffffff;">"Barun's Legacy Run"</strong> — and all of its contents including source code, game mechanics, visuals, sounds, and design are the <strong style="color:#fbbf24;">exclusive intellectual property</strong> of <strong style="color:#60a5fa;">Barun Kumar Shaw</strong>.
+      </p>
+    </div>
+
+    <div style="background:rgba(37,99,235,0.08); border:1px solid #2563eb; border-radius:10px; padding:20px; text-align:left; margin-bottom:20px;">
+      <p style="color:#93c5fd; font-size:12px; line-height:2; margin:0;">
+        🚫 <strong>STRICTLY PROHIBITED:</strong><br>
+        • Copying, cloning or reproducing this game in any form<br>
+        • Reverse engineering or inspecting the source code<br>
+        • Distributing, selling or claiming ownership of this game<br>
+        • Recording or capturing gameplay for commercial use<br>
+        • Modifying and re-publishing under a different name
+      </p>
+    </div>
+
+    <div style="background:rgba(124,58,237,0.08); border:1px solid #7c3aed; border-radius:10px; padding:16px; text-align:left; margin-bottom:20px;">
+      <p style="color:#c4b5fd; font-size:12px; line-height:1.8; margin:0;">
+        ⚖️ <strong>LEGAL CONSEQUENCE:</strong> Any unauthorized copying, reproduction, or distribution of this game or its code is a <strong style="color:#fbbf24;">criminal offense</strong> under the <strong style="color:#f0abfc;">Indian Copyright Act, 1957</strong> and the <strong style="color:#f0abfc;">Information Technology Act, 2000</strong>. Violators may face legal prosecution, fines, and imprisonment.
+      </p>
+    </div>
+
+    <p style="color:#4ade80; font-size:13px; font-weight:700; margin-bottom:6px;">✅ © 2026 Barun Kumar Shaw — All Rights Reserved</p>
+    <p style="color:#64748b; font-size:11px; margin-bottom:16px;">This notice is legally binding. By playing this game you agree to these terms.</p>
+
+    <!-- Auto-close progress bar -->
+    <div style="background:#1e293b; border-radius:4px; overflow:hidden;">
+      <div id="disclaimer-bar"></div>
+    </div>
+    <p style="color:#475569; font-size:11px; margin-top:8px;">Game loading automatically... 5 seconds</p>
+  </div>
+</div>
+
+<div id="ui-layer">
+
+  <!-- start screen -->
+  <div id="start-screen" class="text-center bg-slate-900/95 p-8 sm:p-10 rounded-3xl border-2 border-blue-500 shadow-[0_0_60px_rgba(59,130,246,0.5)] flex flex-col items-center max-w-md w-full mx-4" style="backdrop-filter:blur(12px)">
+    <div class="text-6xl mb-4">👷 🏆 ⚙️</div>
+    <h1 class="text-5xl font-black text-blue-400 mb-1 tracking-widest drop-shadow-lg" style="text-shadow: 0 0 15px rgba(96,165,250,0.6);">LEGACY RUN</h1>
+    <p class="text-yellow-400 text-xs tracking-widest font-bold mb-1">⚡ SURVIVE · COLLECT · CONQUER ⚡</p>
+      <div class="flex gap-2 flex-wrap justify-center mb-0">
+        <a href="https://www.linkedin.com/in/barun-shaw-08a36a266" target="_blank" class="profile-link text-sm" style="margin-bottom:0">
+          💼 LINKEDIN ↗
+        </a>
+        <a href="https://github.com/Barun-kumar-shaw" target="_blank" class="profile-link text-sm" style="margin-bottom:0; border-color:#6e40c9; color:#a78bfa; background:rgba(110,64,201,0.15);">
+          💻 GITHUB ↗
+        </a>
+      </div>
+
+    <div class="w-full border-t border-gray-700 pt-3 mb-3">
+      <p class="text-yellow-300 italic text-sm mb-1">"Discipline separates engineers from dreamers."</p>
+      <p class="text-gray-400 text-xs">Avoid 🚬🍺🍷 | Collect ⚙️🏆📜 | Jump = Score</p>
+    </div>
+
+    <!-- High Score History on Start Screen -->
+    <div class="w-full mb-3">
+      <p class="text-gray-400 text-xs tracking-widest mb-2">🏅 TOP SCORES</p>
+      <div id="start-leaderboard" class="text-sm"></div>
+    </div>
+
+    <div class="flex flex-col gap-2 w-full">
+      <button class="btn btn-easy"   onclick="window.G.start('EASY')">🟢 EASY</button>
+      <button class="btn btn-medium" onclick="window.G.start('MEDIUM')">🟡 MEDIUM</button>
+      <button class="btn btn-hard"   onclick="window.G.start('HIGH')">🔴 HIGH SCORE MODE</button>
+      <button class="btn btn-info"   onclick="window.showManual()">📖 HOW TO PLAY</button>
+    </div>
+  </div>
+
+  <!-- manual modal -->
+  <div id="manual-modal" class="hidden absolute inset-0 bg-black/90 flex justify-center items-center z-50 pointer-events-auto px-4">
+    <div class="bg-slate-800 p-8 sm:p-10 rounded-3xl border-2 border-blue-400 max-w-md w-full shadow-[0_0_60px_rgba(59,130,246,0.4)] text-center">
+      <h2 class="text-2xl font-bold text-yellow-400 mb-5">📖 HOW TO PLAY</h2>
+      <div class="text-left space-y-3 text-base mb-6">
+        <p>💻 <strong>PC:</strong> <span class="text-blue-400">SPACEBAR</span> to jump</p>
+        <p>📱 <strong>Mobile:</strong> Tap <span class="text-blue-400">JUMP</span> button (bottom right)</p>
+        <hr class="border-gray-600">
+        <p>⚙️ Collect skills & trophies for <span class="text-yellow-400">+100 pts</span></p>
+        <p>🔥 Combo multiplier kicks in at <span class="text-yellow-400">3 in a row!</span></p>
+        <p>☠️ Hit 🚬🍺🍷 = <span class="text-red-400">GAME OVER</span></p>
+        <p>📈 Speed slowly increases as you score more</p>
+      </div>
+      <button class="btn btn-retry" onclick="window.hideManual()">GOT IT! 🚀</button>
+    </div>
+  </div>
+
+  <!-- game over screen -->
+  <div id="game-over-screen" class="hidden text-center bg-slate-900/95 p-8 sm:p-10 rounded-3xl border-2 border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.5)] flex flex-col items-center max-w-md w-full mx-4" style="backdrop-filter:blur(12px)">
+    <div class="text-6xl mb-3" id="death-emoji">💥</div>
+    <h1 class="text-5xl font-black text-red-500 mb-2" style="text-shadow: 0 0 15px rgba(239,68,68,0.6);">CRASHED!</h1>
+    <p class="text-gray-300 text-sm italic mb-4">"True engineers rebuild after every crash."</p>
+
+    <div class="flex gap-2 flex-wrap justify-center">
+      <a href="https://www.linkedin.com/in/barun-shaw-08a36a266" target="_blank" class="profile-link" style="margin-bottom:8px">
+        💼 LINKEDIN ↗
+      </a>
+      <a href="https://github.com/Barun-kumar-shaw" target="_blank" class="profile-link" style="margin-bottom:8px; border-color:#6e40c9; color:#a78bfa; background:rgba(110,64,201,0.15);">
+        💻 GITHUB ↗
+      </a>
+    </div>
+
+    <div class="flex justify-between items-center mb-4">
+      <div class="text-left">
+        <p class="text-gray-400 text-xs">YOUR SCORE</p>
+        <p class="text-3xl font-black text-yellow-400" id="final-score">0</p>
+      </div>
+      <div class="text-right">
+        <p class="text-gray-400 text-xs">PERSONAL BEST</p>
+        <p class="text-2xl font-black text-blue-400" id="high-score-display">0</p>
+      </div>
+    </div>
+
+    <div id="new-record-banner" class="hidden mb-3 p-2 rounded-lg bg-yellow-400/20 border border-yellow-400">
+      <p class="text-yellow-400 font-black text-lg">🎉 NEW HIGH SCORE!</p>
+    </div>
+
+    <!-- Score History -->
+    <div class="w-full mb-4">
+      <p class="text-gray-400 text-xs tracking-widest mb-2">🏆 YOUR SCORE HISTORY</p>
+      <div id="score-history" class="text-sm"></div>
+    </div>
+
+    <button class="btn btn-retry" onclick="window.G.reset()">⚡ REBUILD (RETRY)</button>
+    <button class="btn btn-info mt-2" onclick="window.G.backToMenu()">🏠 MAIN MENU</button>
+  </div>
+
+  <!-- ===== HUD ===== -->
+  <div id="hud" class="hidden absolute top-0 left-0 w-full p-4 flex justify-between items-start z-10 pointer-events-none">
+    <div>
+      <div class="text-yellow-400 font-black text-xl" id="score-hud">SCORE: 0</div>
+      <div class="text-blue-400 text-xs font-bold" id="speed-hud">SPEED ●●○○○</div>
+    </div>
+    <div class="text-right">
+      <div class="text-gray-400 text-xs">BEST</div>
+      <div class="text-blue-300 font-bold text-sm" id="best-hud">0</div>
+      <div class="text-green-400 font-black text-xs mt-1">SOBER 💪</div>
+    </div>
+  </div>
+
+  <!-- COMBO -->
+  <div id="combo-display"></div>
+
+  <!-- MOBILE JUMP -->
+  <div id="mobile-jump-btn" class="hidden" 
+       onmousedown="window.G.triggerJump(event)" 
+       ontouchstart="window.G.triggerJump(event)">
+    ⬆️<br>JUMP
+  </div>
+
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+// © 2026 Barun Kumar Shaw
+// Barun's Legacy Run — built from scratch using HTML5 Canvas + Vanilla JS
+
+// protection block — keeps devtools and copy shortcuts blocked
+(function() {
+  document.addEventListener('keydown', function(e) {
+    const blocked = [
+      e.key === 'F12',
+      e.ctrlKey && ['u','U','s','S','a','A','c','C','p','P','i','I','j','J'].includes(e.key),
+      e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C','k','K'].includes(e.key),
+      e.metaKey && ['u','U','s','S','a','A','c','C','p','P'].includes(e.key)
+    ];
+    if (blocked.some(Boolean)) e.preventDefault();
+  }, true);
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  let devOpen = false;
+  setInterval(() => {
+    const wDiff = window.outerWidth  - window.innerWidth  > 160;
+    const hDiff = window.outerHeight - window.innerHeight > 160;
+    if (wDiff || hDiff) {
+      if (!devOpen) {
+        devOpen = true;
+        if (window.G) window.G.isPlaying = false;
+        document.body.style.filter = 'blur(8px)';
+        const box = document.createElement('div');
+        box.id = 'dev-warning';
+        box.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center;color:white;text-align:center;font-family:monospace;';
+        box.innerHTML = '<div style="font-size:60px">🚫</div><h1 style="color:#ef4444;font-size:28px;margin:10px">ACCESS DENIED</h1><p style="color:#fbbf24;font-size:16px">© 2026 Barun Kumar Shaw</p><p style="color:#94a3b8;font-size:13px;max-width:400px;margin-top:10px">This game is copyright protected.<br>Inspection and copying are not allowed.</p>';
+        document.body.appendChild(box);
+      }
+    } else {
+      if (devOpen) {
+        devOpen = false;
+        document.body.style.filter = '';
+        const box = document.getElementById('dev-warning');
+        if (box) box.remove();
+        if (window.G) window.G.isPlaying = window.G.isDead ? false : true;
+      }
+    }
+  }, 500);
+})();
+
+window.showManual = () => document.getElementById('manual-modal').classList.remove('hidden');
+window.hideManual = () => document.getElementById('manual-modal').classList.add('hidden');
+
+// score history — saves top 10 in localStorage
+const ScoreDB = {
+  KEY: 'barun_score_history_v2',
+  load() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
+    catch(e) { return []; }
+  },
+  save(history) {
+    localStorage.setItem(this.KEY, JSON.stringify(history));
+  },
+  addScore(score, mode) {
+    const history = this.load();
+    history.push({ score: Math.floor(score), mode, date: new Date().toLocaleDateString('en-IN') });
+    history.sort((a, b) => b.score - a.score);
+    const trimmed = history.slice(0, 10);
+    this.save(trimmed);
+    return trimmed;
+  },
+  getBest() {
+    const h = this.load();
+    return h.length > 0 ? h[0].score : 0;
+  },
+  renderHTML(containerId, limit = 5) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const history = this.load().slice(0, limit);
+    if (history.length === 0) {
+      el.innerHTML = '<p class="text-gray-500 text-xs text-center">No scores yet. Play your first game!</p>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    const classes = ['score-gold','score-silver','score-bronze','score-normal'];
+    el.innerHTML = history.map((s, i) => `
+      <div class="score-entry ${classes[Math.min(i, 3)]}">
+        <span>${medals[i] || '#'+(i+1)} ${s.score.toLocaleString()}</span>
+        <span class="text-gray-400 text-xs">${s.mode} · ${s.date}</span>
+      </div>
+    `).join('');
+  }
+};
+
+// sound engine using Web Audio API oscillators — no mp3 files needed
+const SoundEngine = {
+  ctx: null,
+  init() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  play(type) {
+    try {
+      this.init();
+      const c = this.ctx;
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.connect(gain);
+      gain.connect(c.destination);
+
+      if (type === 'jump') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(300, c.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.15, c.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+        osc.start(); osc.stop(c.currentTime + 0.15);
+      } else if (type === 'collect') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, c.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, c.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2);
+        osc.start(); osc.stop(c.currentTime + 0.2);
+      } else if (type === 'crash') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, c.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, c.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.4, c.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
+        osc.start(); osc.stop(c.currentTime + 0.4);
+      } else if (type === 'combo') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(500, c.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, c.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.25, c.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.25);
+        osc.start(); osc.stop(c.currentTime + 0.25);
+      }
+    } catch(e) {}
+  }
+};
+
+class ParticleSystem {
+  constructor() {
+    this.particles = [];
+  }
+
+  emit(x, y, color, count = 12, spread = 10) {
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * spread,
+        vy: (Math.random() - 1.5) * spread,
+        life: 1.0,
+        decay: 0.03 + Math.random() * 0.02,
+        size: 3 + Math.random() * 4,
+        color
+      });
+    }
+  }
+
+  update() {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.3;
+      p.life -= p.decay;
+      if (p.life <= 0) this.particles.splice(i, 1);
+    }
+  }
+
+  draw(ctx) {
+    this.particles.forEach(p => {
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+}
+
+class Player {
+  constructor(game) {
+    this.game = game;
+    this.w = 50;
+    this.h = 50;
+    this.x = 110;
+    this.y = 0;
+    this.vy = 0;
+    this.gravity = 3200;
+    this.jumpPower = 1100;
+    this.jumpCount = 0;
+    this.maxJumps = 2;
+    this.sprite = "👷";
+  }
+
+  reset() {
+    this.y = this.game.floorY;
+    this.vy = 0;
+    this.jumpCount = 0;
+  }
+
+  jump() {
+    if (this.jumpCount < this.maxJumps) {
+      this.vy = this.jumpCount === 0 ? -this.jumpPower : -this.jumpPower * 0.75;
+      this.jumpCount++;
+      this.game.particles.emit(this.x + 25, this.y + 50, '#94a3b8', 8, 6);
+      SoundEngine.play('jump');
+    }
+  }
+
+  update(dt) {
+    this.vy += this.gravity * dt;
+    this.y  += this.vy * dt;
+    if (this.y >= this.game.floorY) {
+      this.y = this.game.floorY;
+      this.vy = 0;
+      this.jumpCount = 0;
+    }
+  }
+
+  draw(ctx) {
+    ctx.font = "50px Arial";
+    ctx.fillText(this.sprite, this.x, this.y + 48);
+  }
+}
+
+class Obstacle {
+  constructor(game) {
+    this.game = game;
+    this.w = 45;
+    this.h = 45;
+    this.x = game.canvas.width + 20;
+    this.y = game.floorY + 2;
+    this.sprite = ["🚬","🍺","🍷"][Math.floor(Math.random() * 3)];
+  }
+  update(dt) {
+    this.x -= this.game.speed * 200 * dt;
+  }
+  draw(ctx) {
+    ctx.font = "45px Arial";
+    ctx.fillText(this.sprite, this.x, this.y + 40);
+  }
+}
+
+class Collectible {
+  constructor(game) {
+    this.game = game;
+    this.w = 40;
+    this.h = 40;
+    this.x = game.canvas.width + 20;
+    this.y = game.floorY - (Math.random() > 0.5 ? 130 : 0);
+    this.sprite = ["⚙️","🏆","📜","🏛️","💡","🔬"][Math.floor(Math.random() * 6)];
+    this.bob = Math.random() * Math.PI * 2;
+  }
+  update(dt) {
+    this.x -= this.game.speed * 200 * dt;
+    this.bob += dt * 4;
+  }
+  draw(ctx) {
+    const bobY = Math.sin(this.bob) * 5;
+    ctx.beginPath();
+    ctx.arc(this.x + 20, this.y + bobY + 15, 22, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(250,204,21,0.18)";
+    ctx.fill();
+    ctx.font = "38px Arial";
+    ctx.fillText(this.sprite, this.x, this.y + bobY + 30);
+    this.drawY = this.y + bobY;
+  }
+}
+
+class FloatingText {
+  constructor(text, x, y, color = '#fbbf24') {
+    this.text = text;
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.life = 1.0;
+  }
+  update() {
+    this.y -= 2;
+    this.life -= 0.025;
+  }
+  draw(ctx) {
+    ctx.globalAlpha = Math.max(0, this.life);
+    ctx.fillStyle = this.color;
+    ctx.font = "bold 22px 'JetBrains Mono', monospace";
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.globalAlpha = 1;
+  }
+}
+
+class Game {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx    = this.canvas.getContext('2d');
+
+    this.baseSpeed = 6.0;
+    this.speed     = this.baseSpeed;
+    this.accel     = 0.015;
+    this.maxSpeed  = 14;
+
+    this.isPlaying = false;
+    this.isDead    = false;
+    this.score     = 0;
+    this.mode      = 'EASY';
+    this.modeMult  = 1.0;
+    this.combo     = 0;
+    this.comboTimer= 0;
+
+    this.shakeIntensity = 0;
+    this.flashAlpha     = 0;
+    this.particles      = new ParticleSystem();
+    this.floatingTexts  = [];
+    this.bgOffset       = 0;
+
+    this.obstacles   = [];
+    this.collectibles= [];
+    this.spawnTimer  = 0;
+    this.collectTimer= 0.8;
+
+    this.player   = new Player(this);
+    this.lastTime = performance.now();
+
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); this.triggerJump(); }
+    });
+
+    window.addEventListener('touchstart', e => {
+      if (['BUTTON','A'].includes(e.target.tagName) || e.target.id === 'mobile-jump-btn') return;
+      e.preventDefault();
+      this.triggerJump();
+    }, { passive: false });
+
+    ScoreDB.renderHTML('start-leaderboard', 3);
+    requestAnimationFrame(t => this.loop(t));
+  }
+
+  resize() {
+    this.canvas.width  = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.floorY = this.canvas.height - 145;
+    this.player.y = this.floorY;
+  }
+
+  start(mode) {
+    this.mode     = mode;
+    this.modeMult = { EASY: 1.0, MEDIUM: 1.5, HIGH: 2.0 }[mode];
+    this.speed    = this.baseSpeed * this.modeMult;
+    this.score    = 0;
+    this.obstacles    = [];
+    this.collectibles = [];
+    this.floatingTexts= [];
+    this.particles    = new ParticleSystem();
+    this.combo      = 0;
+    this.comboTimer = 0;
+    this.isPlaying  = true;
+    this.isDead     = false;
+    this.shakeIntensity = 0;
+    this.flashAlpha     = 0;
+    this.spawnTimer  = 0;
+    this.collectTimer= 0.8;
+    this.player.reset();
+
+    ['start-screen','game-over-screen','manual-modal'].forEach(id =>
+      document.getElementById(id).classList.add('hidden'));
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('mobile-jump-btn').classList.remove('hidden');
+    document.getElementById('best-hud').textContent = ScoreDB.getBest();
+    this.lastTime = performance.now();
+  }
+
+  reset() { this.start(this.mode); }
+
+  backToMenu() {
+    this.isDead    = false;
+    this.isPlaying = false;
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    ScoreDB.renderHTML('start-leaderboard', 3);
+  }
+
+  triggerJump(e) {
+    if (e) e.preventDefault?.();
+    if (this.isPlaying && !this.isDead) this.player.jump();
+  }
+
+  die() {
+    this.isDead    = true;
+    this.isPlaying = false;
+    SoundEngine.play('crash');
+    this.shakeIntensity = 28;
+    this.flashAlpha     = 0.75;
+    this.particles.emit(this.player.x + 25, this.player.y + 25, '#ef4444', 30, 14);
+
+    const finalScore = Math.floor(this.score);
+    const isNewBest  = finalScore > ScoreDB.getBest();
+    ScoreDB.addScore(finalScore, this.mode);
+
+    setTimeout(() => {
+      document.getElementById('game-over-screen').classList.remove('hidden');
+      document.getElementById('hud').classList.add('hidden');
+      document.getElementById('mobile-jump-btn').classList.add('hidden');
+      document.getElementById('final-score').textContent       = finalScore.toLocaleString();
+      document.getElementById('high-score-display').textContent= ScoreDB.getBest().toLocaleString();
+      document.getElementById('new-record-banner').classList.toggle('hidden', !isNewBest);
+      document.getElementById('death-emoji').textContent = ['💥','😵','🤕','💀'][Math.floor(Math.random()*4)];
+      ScoreDB.renderHTML('score-history', 5);
+    }, 900);
+  }
+
+  showCombo(count) {
+    const el = document.getElementById('combo-display');
+    el.textContent  = `🔥 ${count}x COMBO!`;
+    el.style.opacity= '1';
+    clearTimeout(this._comboTimeout);
+    this._comboTimeout = setTimeout(() => el.style.opacity = '0', 1200);
+  }
+
+  loop(timestamp) {
+    requestAnimationFrame(t => this.loop(t));
+    const dt = Math.min((timestamp - this.lastTime) / 1000, 0.05);
+    this.lastTime = timestamp;
+
+    this.ctx.save();
+    if (this.shakeIntensity > 0.5) {
+      this.ctx.translate(
+        (Math.random() - 0.5) * this.shakeIntensity,
+        (Math.random() - 0.5) * this.shakeIntensity
+      );
+      this.shakeIntensity *= 0.88;
+    }
+
+    this.update(dt);
+    this.draw();
+    this.ctx.restore();
+
+    if (this.flashAlpha > 0.01) {
+      this.ctx.fillStyle = `rgba(220,38,38,${this.flashAlpha})`;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.flashAlpha -= dt * 2;
+    }
+  }
+
+  update(dt) {
+    if (!this.isPlaying || this.isDead) return;
+
+    this.speed += this.accel * this.modeMult * dt;
+    if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
+
+    this.score     += this.speed * dt * 3;
+    this.bgOffset  += this.speed * 60 * dt;
+
+    if (this.combo > 0) {
+      this.comboTimer -= dt;
+      if (this.comboTimer <= 0) this.combo = 0;
+    }
+
+    this.player.update(dt);
+
+    this.spawnTimer -= dt;
+    if (this.spawnTimer <= 0) {
+      this.obstacles.push(new Obstacle(this));
+      this.spawnTimer = Math.max(0.9, 2.8 - (this.score / 1500));
+    }
+
+    this.collectTimer -= dt;
+    if (this.collectTimer <= 0) {
+      this.collectibles.push(new Collectible(this));
+      this.collectTimer = Math.max(1.0, 3.2 - (this.score / 1200));
+    }
+
+    const m  = 14;
+    const px = this.player.x, py = this.player.y;
+    const pw = this.player.w,  ph = this.player.h;
+
+    for (let i = this.obstacles.length - 1; i >= 0; i--) {
+      const o = this.obstacles[i];
+      o.update(dt);
+      if (px+m < o.x+o.w-m && px+pw-m > o.x+m && py+m < o.y+o.h-m && py+ph-m > o.y+m) {
+        this.die(); return;
+      }
+      if (o.x + o.w < -10) this.obstacles.splice(i, 1);
+    }
+
+    for (let i = this.collectibles.length - 1; i >= 0; i--) {
+      const c  = this.collectibles[i];
+      c.update(dt);
+      const cy = c.drawY ?? c.y;
+      if (px+8 < c.x+c.w && px+pw-8 > c.x && py+8 < cy+c.h && py+ph-8 > cy) {
+        this.combo++;
+        this.comboTimer = 3.0;
+        const pts = 100 * Math.max(1, this.combo >= 3 ? this.combo : 1);
+        this.score += pts;
+        this.particles.emit(c.x + 20, cy + 15, '#fbbf24', 14, 8);
+        this.floatingTexts.push(new FloatingText(`+${pts}`, c.x, cy - 10, '#fbbf24'));
+        if (this.combo >= 3) { SoundEngine.play('combo'); this.showCombo(this.combo); }
+        else SoundEngine.play('collect');
+        this.collectibles.splice(i, 1);
+        continue;
+      }
+      if (c.x + c.w < -10) this.collectibles.splice(i, 1);
+    }
+
+    this.particles.update();
+    this.floatingTexts = this.floatingTexts.filter(f => f.life > 0);
+    this.floatingTexts.forEach(f => f.update());
+
+    const sp = Math.min(5, Math.round((this.speed / this.maxSpeed) * 5));
+    document.getElementById('score-hud').textContent = `SCORE: ${Math.floor(this.score).toLocaleString()}`;
+    document.getElementById('speed-hud').textContent = `SPEED ${'●'.repeat(sp)}${'○'.repeat(5-sp)}`;
+  }
+
+  draw() {
+    const ctx = this.ctx;
+    const W   = this.canvas.width;
+    const H   = this.canvas.height;
+
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+
+    // show owner watermark on menu/gameover screens
+    if (!this.isPlaying) {
+      const t2 = performance.now() * 0.001;
+      ctx.save();
+      ctx.globalAlpha = 0.15 + Math.sin(t2 * 0.8) * 0.05;
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = `bold ${Math.min(W/10, 80)}px 'JetBrains Mono', monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText('BARUN KUMAR SHAW', W/2, H/2 + 30);
+      ctx.font = `bold ${Math.min(W/18, 40)}px 'JetBrains Mono', monospace`;
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText('© 2026  |  LEGACY RUN', W/2, H/2 + 85);
+      ctx.restore();
+    }
+
+    // moving grid
+    ctx.strokeStyle = 'rgba(59,130,246,0.18)';
+    ctx.lineWidth   = 1.5;
+    const gs = 55;
+    const ox = this.bgOffset % gs;
+    ctx.beginPath();
+    for (let x = -ox; x < W + gs; x += gs) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let y = 0;   y < H;      y += gs) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+
+    const t = performance.now() * 0.001;
+    ctx.fillStyle = 'rgba(37,99,235,0.04)';
+    ctx.beginPath(); ctx.arc(W*0.2, H*0.3 + Math.sin(t)*15, 120, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W*0.8, H*0.6 + Math.cos(t)*12,  90, 0, Math.PI*2); ctx.fill();
+
+    const grad = ctx.createLinearGradient(0, this.floorY+48, 0, this.floorY+62);
+    grad.addColorStop(0, '#3b82f6');
+    grad.addColorStop(1, '#1e3a8a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, this.floorY+48, W, 14);
+    ctx.fillStyle = '#172554';
+    ctx.fillRect(0, this.floorY+62, W, H);
+
+    this.obstacles.forEach(o  => o.draw(ctx));
+    this.collectibles.forEach(c => c.draw(ctx));
+    this.player.draw(ctx);
+    this.particles.draw(ctx);
+    this.floatingTexts.forEach(f => f.draw(ctx));
+
+    // copyright watermark — always visible bottom corners
+    const wt    = performance.now() * 0.001;
+    const pulse = 0.5 + Math.sin(wt * 1.5) * 0.2;
+
+    ctx.save();
+    ctx.globalAlpha = pulse;
+    ctx.fillStyle   = '#2563eb';
+    ctx.font        = "bold 15px 'JetBrains Mono', monospace";
+    ctx.textAlign   = 'right';
+    ctx.fillText('© BARUN KUMAR SHAW', W - 14, H - 14);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle   = '#ffffff';
+    ctx.font        = "bold 15px 'JetBrains Mono', monospace";
+    ctx.textAlign   = 'right';
+    ctx.fillText('© BARUN KUMAR SHAW', W - 15, H - 15);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = '#60a5fa';
+    ctx.font = "bold 13px 'JetBrains Mono', monospace";
+    ctx.textAlign = 'left';
+    ctx.fillText('⚡ LEGACY RUN — BY BARUN', 15, H - 15);
+    ctx.restore();
+  }
+}
+
+window.G = new Game();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
