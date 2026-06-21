@@ -1,7 +1,7 @@
 // © 2026 Barun Kumar Shaw
 // service worker for offline support
 
-const CACHE_NAME = 'barun-legacy-run-v4';
+const CACHE_NAME = 'barun-legacy-run-v5';
 
 const ASSETS = [
   './game.html',

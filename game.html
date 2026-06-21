@@ -78,8 +78,8 @@
     }
 
     #mobile-jump-btn {
-      position: absolute; bottom: 40px; right: 40px;
-      width: 85px; height: 85px;
+      position: absolute; bottom: 70px; right: 30px;
+      width: 75px; height: 75px;
       background: rgba(59,130,246,0.55);
       border: 3px solid rgba(59,130,246,0.9);
       border-radius: 50%; color: white;
@@ -121,9 +121,28 @@
       margin-top: 20px;
     }
     @keyframes fillBar { from { width: 0%; } to { width: 100%; } }
+
+    /* ── ROTATE OVERLAY ── */
+    #rotate-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #0f172a; z-index: 10000;
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center; padding: 20px; border: 4px solid #3b82f6;
+    }
+    @media screen and (max-width: 900px) and (orientation: portrait) {
+      #rotate-overlay { display: flex !important; }
+      #ui-layer, #gameCanvas, #disclaimer-screen { display: none !important; }
+    }
   </style>
 </head>
 <body class="text-white">
+
+<!-- rotate overlay -->
+<div id="rotate-overlay">
+  <div style="font-size: 60px; margin-bottom: 20px; animation: pulse-score 1.5s infinite;">🔄</div>
+  <h1 style="color: #60a5fa; font-size: 26px; font-weight: 900; margin-bottom: 10px; letter-spacing: 2px;">ROTATE YOUR PHONE</h1>
+  <p style="color: #cbd5e1; font-size: 15px; max-width: 300px;">Please hold your phone horizontally (Landscape) to play Legacy Run for the best experience.</p>
+</div>
 
 <!-- legal splash screen -->
 <div id="disclaimer-screen">
@@ -475,8 +494,8 @@ class Player {
     this.x = 110;
     this.y = 0;
     this.vy = 0;
-    this.gravity = 3200;
-    this.jumpPower = 1100;
+    this.baseGravity = 3200;
+    this.baseJumpPower = 1100;
     this.jumpCount = 0;
     this.maxJumps = 2;
     this.sprite = "👷";
@@ -490,7 +509,8 @@ class Player {
 
   jump() {
     if (this.jumpCount < this.maxJumps) {
-      this.vy = this.jumpCount === 0 ? -this.jumpPower : -this.jumpPower * 0.75;
+      const jp = this.baseJumpPower * Math.sqrt(this.game.scaleRatio);
+      this.vy = this.jumpCount === 0 ? -jp : -jp * 0.75;
       this.jumpCount++;
       this.game.particles.emit(this.x + 25, this.y + 50, '#94a3b8', 8, 6);
       SoundEngine.play('jump');
@@ -498,7 +518,7 @@ class Player {
   }
 
   update(dt) {
-    this.vy += this.gravity * dt;
+    this.vy += this.baseGravity * this.game.scaleRatio * dt;
     this.y  += this.vy * dt;
     if (this.y >= this.game.floorY) {
       this.y = this.game.floorY;
