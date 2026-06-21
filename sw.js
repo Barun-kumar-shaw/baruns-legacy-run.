@@ -1,10 +1,10 @@
 // © 2026 Barun Kumar Shaw
 // service worker for offline support
 
-const CACHE_NAME = 'barun-legacy-run-v5';
+const CACHE_NAME = 'barun-legacy-run-v6';
 
 const ASSETS = [
-  './game.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -61,9 +61,9 @@ self.addEventListener('fetch', event => {
 
         return networkResponse;
       }).catch(() => {
-        // fallback to game.html if offline and requested a document
+        // fallback to index.html if offline and requested a document
         if (event.request.destination === 'document') {
-          return caches.match('./game.html');
+          return caches.match('./index.html');
         }
       });
     })

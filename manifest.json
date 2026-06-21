@@ -2,7 +2,7 @@
   "name": "Barun's Legacy Run",
   "short_name": "Legacy Run",
   "description": "Play the journey of an Engineer. Developed by Barun Kumar Shaw.",
-  "start_url": "./game.html",
+  "start_url": "./index.html",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#0f172a",
