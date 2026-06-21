@@ -20,7 +20,7 @@ The game is completely web-based. You don't need to download any ZIP files or ex
 
 This game is built as a **Progressive Web App (PWA)**, meaning you can install it directly to your Home Screen or Desktop like a real Native App!
 
-### For Mobile Users (Android/iOS)
+### For Mobile Users (Android/iOS) under development there is some issues in phone version soon it will available
 1. Open the [Live Link](https://barun-kumar-shaw.github.io/baruns-legacy-run./) in Google Chrome or Safari.
 2. **Rotate your phone horizontally (Landscape)** to play.
 3. Tap the **3-dots menu** (Chrome) or **Share icon** (Safari).
