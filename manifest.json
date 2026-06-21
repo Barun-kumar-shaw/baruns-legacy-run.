@@ -1,6 +1,6 @@
 {
-  "name": "Barun's Legacy Run",
-  "short_name": "Legacy Run",
+  "name": "Barun League Runner",
+  "short_name": "Barun Legacy",
   "description": "Play the journey of an Engineer. Developed by Barun Kumar Shaw.",
   "start_url": "./index.html",
   "display": "fullscreen",
