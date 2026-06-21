@@ -31,12 +31,12 @@ This game is built as a **Progressive Web App (PWA)**, meaning you can install i
 1. Open the [Live Link](https://barun-kumar-shaw.github.io/baruns-legacy-run./) in Google Chrome or Edge.
 2. Look at the right side of your URL Address Bar (top of the screen).
 3. Click the small **Monitor/Download icon** (Install Barun's Legacy Run).
-4. The game will now open in its own full-screen window like a real PC game!
+4. The game will now open in its own full-screen window like a real PC game
 
 ---
 
 ## 🎮 Controls
-* **PC:** Press `SPACEBAR` or `Click` anywhere to Jump. Double-tap for Double Jump!
+* **PC:** Press `SPACEBAR` or `Click` anywhere to Jump. Double-tap for Double Jump
 * **Mobile:** Tap the `⬆️ JUMP` button or Tap anywhere on the screen.
 
 ---
