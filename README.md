@@ -8,7 +8,7 @@
 
 <br/>
 
-## 🚀 Play Directly (No Download Required!)
+## 🚀 Play Directly (No Download Required)
 
 The game is completely web-based. You don't need to download any ZIP files or extract code to play. 
 
@@ -18,7 +18,7 @@ The game is completely web-based. You don't need to download any ZIP files or ex
 
 ## 📱 How to Install the Game (PC & Mobile)
 
-This game is built as a **Progressive Web App (PWA)**, meaning you can install it directly to your Home Screen or Desktop like a real Native App!
+This game is built as a **Progressive Web App (PWA)**, meaning you can install it directly to your Home Screen or Desktop like a real Native App
 
 ### For Mobile Users (Android/iOS) under development there is some issues in phone version soon it will available
 1. Open the [Live Link](https://barun-kumar-shaw.github.io/baruns-legacy-run./) in Google Chrome or Safari.
