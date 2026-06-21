@@ -11,7 +11,7 @@
 
 *Developed entirely by Barun Kumar Shaw*
 
-[▶ Play Now](#) · [💼 LinkedIn](https://www.linkedin.com/in/barun-shaw-08a36a266) · [💻 GitHub](https://github.com/Barun-kumar-shaw)
+[▶ Play Now]( https://barun-kumar-shaw.github.io/baruns-legacy-run./game.html ) · [💼 LinkedIn](https://www.linkedin.com/in/barun-shaw-08a36a266) · [💻 GitHub](https://github.com/Barun-kumar-shaw)
 
 </div>
 
