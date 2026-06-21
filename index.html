@@ -85,7 +85,7 @@
     }
 
     #mobile-jump-btn {
-      position: absolute; bottom: 70px; right: 30px;
+      position: absolute; bottom: 30px; right: 30px;
       width: 75px; height: 75px;
       background: rgba(59,130,246,0.55);
       border: 3px solid rgba(59,130,246,0.9);
@@ -197,7 +197,7 @@
 <div id="ui-layer">
 
   <!-- start screen -->
-  <div id="start-screen" class="text-center bg-slate-900/95 p-8 sm:p-10 rounded-3xl border-2 border-blue-500 shadow-[0_0_60px_rgba(59,130,246,0.5)] flex flex-col items-center max-w-md w-full mx-4" style="backdrop-filter:blur(12px)">
+  <div id="start-screen" class="text-center bg-slate-900/95 p-4 sm:p-10 rounded-3xl border-2 border-blue-500 shadow-[0_0_60px_rgba(59,130,246,0.5)] flex flex-col items-center max-w-md w-full mx-4 max-h-[95vh] overflow-y-auto" style="backdrop-filter:blur(12px)">
     <div class="text-6xl mb-4">👷 🏆 ⚙️</div>
     <h1 class="text-5xl font-black text-blue-400 mb-1 tracking-widest drop-shadow-lg" style="text-shadow: 0 0 15px rgba(96,165,250,0.6);">LEGACY RUN</h1>
     <p class="text-yellow-400 text-xs tracking-widest font-bold mb-1">⚡ SURVIVE · COLLECT · CONQUER ⚡</p>
@@ -231,7 +231,7 @@
 
   <!-- manual modal -->
   <div id="manual-modal" class="hidden absolute inset-0 bg-black/90 flex justify-center items-center z-50 pointer-events-auto px-4">
-    <div class="bg-slate-800 p-8 sm:p-10 rounded-3xl border-2 border-blue-400 max-w-md w-full shadow-[0_0_60px_rgba(59,130,246,0.4)] text-center">
+    <div class="bg-slate-800 p-6 sm:p-10 rounded-3xl border-2 border-blue-400 max-w-md w-full shadow-[0_0_60px_rgba(59,130,246,0.4)] text-center max-h-[95vh] overflow-y-auto">
       <h2 class="text-2xl font-bold text-yellow-400 mb-5">📖 HOW TO PLAY</h2>
       <div class="text-left space-y-3 text-base mb-6">
         <p>💻 <strong>PC:</strong> <span class="text-blue-400">SPACEBAR</span> to jump</p>
@@ -247,7 +247,7 @@
   </div>
 
   <!-- game over screen -->
-  <div id="game-over-screen" class="hidden text-center bg-slate-900/95 p-8 sm:p-10 rounded-3xl border-2 border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.5)] flex flex-col items-center max-w-md w-full mx-4" style="backdrop-filter:blur(12px)">
+  <div id="game-over-screen" class="hidden text-center bg-slate-900/95 p-4 sm:p-10 rounded-3xl border-2 border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.5)] flex flex-col items-center max-w-md w-full mx-4 max-h-[95vh] overflow-y-auto" style="backdrop-filter:blur(12px)">
     <div class="text-6xl mb-3" id="death-emoji">💥</div>
     <h1 class="text-5xl font-black text-red-500 mb-2" style="text-shadow: 0 0 15px rgba(239,68,68,0.6);">CRASHED!</h1>
     <p class="text-gray-300 text-sm italic mb-4">"True engineers rebuild after every crash."</p>
